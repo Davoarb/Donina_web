@@ -1,4 +1,9 @@
 # 🌿 Donina — Holistic Therapy & Wellness Center
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 
 > Complete redesign and custom frontend development for the local wellness center **Donina** (Gijón, Spain). This project replaces a legacy website builder template with a modern, high-performance Single Page Application (SPA) optimized for client acquisition and direct booking.
 
