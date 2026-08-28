@@ -46,7 +46,7 @@ const ContactSection = () => {
     value: (
       <div className="text-sm">
         <p>Lun - Vie: 10:00-16:00</p>
-        <p className="text-pink-500 font-semibold mt-1">Citas con reserva</p>
+        <p className="text-pink-500 font-semibold mt-1">Consultas: Cita previa</p>
       </div>
     )
   },
