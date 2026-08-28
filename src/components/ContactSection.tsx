@@ -45,8 +45,8 @@ const ContactSection = () => {
     label: "Horario",
     value: (
       <div className="text-sm">
-        <p>Lun - Vie: 10:00-13:30 / 16:30-19:30</p>
-        <p className="text-pink-500 font-semibold mt-1">Sáb - Dom: Cerrado</p>
+        <p>Lun - Vie: 10:00-16:00</p>
+        <p className="text-pink-500 font-semibold mt-1">Citas con reserva</p>
       </div>
     )
   },
