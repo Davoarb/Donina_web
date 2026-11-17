@@ -2,10 +2,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
-  { label: "Inicio", href: "#hero" },
-  { label: "Especialidades", href: "#servicios" },
-  { label: "Nosotros", href: "#nosotros" },
-  { label: "Contacto", href: "#contacto" },
+  { label: "Inicio", href: "/#hero" },
+  { label: "Especialidades", href: "/#servicios" },
+  { label: "Nosotros", href: "/#nosotros" },
+  { label: "Contacto", href: "/#contacto" },
 ];
 
 const Navbar = () => {
@@ -20,11 +20,10 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <a href="#hero" className="flex items-center gap-3 group">
-        <img src="Iconop.png" alt="Logo Donina" className="w-12 h-9" />
+        <a href="/#hero" className="flex items-center gap-3 group">
+          <img src="Iconop.png" alt="Logo Donina" className="w-12 h-9" />
           <span className="font-display text-xl font-bold tracking-wider text-foreground">DONINA</span>
         </a>
-
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (

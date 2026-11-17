@@ -1,34 +1,105 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { Link } from "react-router-dom";
 
 const ContactSection = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const { toast } = useToast();
+  
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const turnstileRef = useRef<any>(null);
 
   const rawPhone = (import.meta.env.VITE_CONTACT_PHONE as string) || "+34 600 000 000";
   const cleanPhone = rawPhone.replace(/\D/g, "");
   const whatsappUrl = `https://wa.me/${cleanPhone}?text=Hola,%20me%20gustar%C3%ADa%20reservar%20una%20cita`;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
-    toast({
-      title: "Mensaje enviado",
-      description: "Gracias por contactarnos, nos pondremos en contacto contigo lo antes posible.",
-    });
+    
+    if (!acceptedPrivacy) {
+      toast({
+        title: "Atención",
+        description: "Debes aceptar la Política de Privacidad para enviar el mensaje.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!turnstileToken) {
+      toast({
+        title: "Verificación requerida",
+        description: "Por favor, completa la verificación antispam.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Preparamos los datos tal y como los espera el Cloudflare Worker
+      const submitData = new FormData();
+      submitData.append("name", formData.name);
+      submitData.append("email", formData.email);
+      submitData.append("message", formData.message);
+      submitData.append("cf-turnstile-response", turnstileToken);
+
+      // SUSTITUYE ESTA URL POR LA DE TU WORKER DE CLOUDFLARE
+      const workerUrl = import.meta.env.VITE_WORKER_URL || "https://contacto-donina.<tu-usuario>.workers.dev";
+      
+      const response = await fetch(workerUrl, {
+        method: "POST",
+        body: submitData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Error al enviar el mensaje");
+      }
+
+      toast({
+        title: "Mensaje enviado",
+        description: "Gracias por contactarnos, te responderemos lo antes posible.",
+      });
+
+      // Limpiamos el formulario
+      setFormData({ name: "", email: "", message: "" });
+      setAcceptedPrivacy(false);
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Hubo un problema al enviar el mensaje. Inténtalo más tarde.",
+        variant: "destructive",
+      });
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-    const contactInfo = [
+
+  const contactInfo = [
     {
       icon: MapPin,
       label: "Dirección",
-      value: (import.meta.env.VITE_CONTACT_ADDRESS as string) || "Calle Ejemplo 123, Ciudad",
+      value: (import.meta.env.VITE_CONTACT_ADDRESS as string) || "Calle Aguado, número 8, bajo 1, 33202 Gijón",
     },
     {
       icon: Phone,
@@ -38,26 +109,25 @@ const ContactSection = () => {
     {
       icon: Mail,
       label: "Email",
-      value: (import.meta.env.VITE_CONTACT_EMAIL as string) || "contacto@ejemplo.com",
+      value: (import.meta.env.VITE_CONTACT_EMAIL as string) || "hipnosisdonina@gmail.com",
     },
-  {
-    icon: Clock,
-    label: "Horario",
-    value: (
-      <div className="text-sm">
-        <p>Lun - Vie: 10:00-16:00</p>
-        <p className="text-pink-500 font-semibold mt-1">Consultas: Cita previa</p>
-      </div>
-    )
-  },
-];
+    {
+      icon: Clock,
+      label: "Horario",
+      value: (
+        <div className="text-sm">
+          <p>Lun - Vie: 10:00-16:00</p>
+          <p className="text-pink-500 font-semibold mt-1">Consultas: Cita previa</p>
+        </div>
+      )
+    },
+  ];
 
   return (
     <section id="contacto" className="py-24 md:py-32 bg-background relative" ref={ref}>
       <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl" />
 
       <div className="container mx-auto px-6 relative z-10">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -74,7 +144,6 @@ const ContactSection = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 max-w-6xl mx-auto">
-          {/* Form */}
           <motion.form
             onSubmit={handleSubmit}
             initial={{ opacity: 0, x: -40 }}
@@ -91,6 +160,7 @@ const ContactSection = () => {
                 onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
                 required
                 className="bg-secondary/50 border-border focus:border-primary"
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -103,6 +173,7 @@ const ContactSection = () => {
                 onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
                 required
                 className="bg-secondary/50 border-border focus:border-primary"
+                disabled={isSubmitting}
               />
             </div>
             <div>
@@ -115,17 +186,57 @@ const ContactSection = () => {
                 required
                 rows={5}
                 className="bg-secondary/50 border-border focus:border-primary resize-none"
+                disabled={isSubmitting}
               />
             </div>
+
+            {/* Checkbox de Privacidad */}
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="privacy"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                disabled={isSubmitting}
+              />
+              <label htmlFor="privacy" className="text-sm font-body text-muted-foreground leading-tight">
+                He leído y acepto la{" "}
+                <Link to="/politica-privacidad" className="text-primary hover:underline">
+                  Política de Privacidad
+                </Link>{" "}
+                y consiento el tratamiento de mis datos.
+              </label>
+            </div>
+
+            {/* Verificación Turnstile */}
+            <div className="min-h-[65px]">
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAA..._TU_SITE_KEY_AQUI"}
+                onSuccess={(token) => setTurnstileToken(token)}
+                onError={() => setTurnstileToken(null)}
+                onExpire={() => setTurnstileToken(null)}
+              />
+            </div>
+
             <Button
               type="submit"
-              className="w-full bg-primary text-primary-foreground font-body font-semibold tracking-widest uppercase text-sm py-6 rounded-full hover:bg-primary/90 hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300"
+              disabled={isSubmitting || !turnstileToken || !acceptedPrivacy}
+              className="w-full bg-primary text-primary-foreground font-body font-semibold tracking-widest uppercase text-sm py-6 rounded-full hover:bg-primary/90 hover:shadow-[0_8px_30px_-6px_hsl(var(--primary)/0.5)] transition-all duration-300 flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Enviar mensaje
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  Enviando...
+                </>
+              ) : (
+                "Enviar mensaje"
+              )}
             </Button>
           </motion.form>
 
-          {/* Contact info */}
+          {/* Información de contacto */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -152,7 +263,7 @@ const ContactSection = () => {
               </motion.div>
             ))}
 
-            {/* Social */}
+            {/* Redes Sociales y WhatsApp */}
             <div className="flex gap-4 pt-4">
               <a href="https://www.instagram.com/donina_gonzalez/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground text-primary transition-all duration-300" aria-label="Instagram">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
