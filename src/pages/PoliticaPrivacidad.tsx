@@ -48,13 +48,16 @@ const PoliticaPrivacidad = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-foreground mt-8 mb-3">5. DESTINATARIOS Y ENCARGADOS DEL TRATAMIENTO</h3>
-              <p className="mb-3">Tus datos no serán cedidos a terceros salvo obligación legal. Sin embargo, para poder prestar el servicio, utilizamos infraestructuras tecnológicas de terceros que actúan como encargados del tratamiento bajo estrictas normas de confidencialidad:</p>
-              <ul className="list-disc pl-6 space-y-2 mb-3">
-                <li><strong>Cloudflare, Inc.:</strong> Utilizamos su red global para proteger la web contra ataques, filtrar spam (Turnstile) y procesar temporalmente el envío del formulario.</li>
-                <li><strong>Servicios de correo:</strong> Usamos pasarelas seguras para redirigir el contenido del formulario directamente a nuestra bandeja de entrada.</li>
-              </ul>
-              <p>Estos proveedores pueden tener servidores fuera del Espacio Económico Europeo, pero operan bajo marcos de privacidad y acuerdos de procesamiento de datos (DPA) que garantizan un nivel de protección adecuado conforme al RGPD.</p>
+              <h3 className="text-lg font-bold text-foreground mt-8 mb-3">5. DESTINATARIOS, ENCARGADOS DEL TRATAMIENTO Y TRANSFERENCIAS INTERNACIONALES</h3>
+              <p className="mb-3">
+                Tus datos no serán cedidos a terceros salvo obligación legal. Sin embargo, para gestionar el envío de los formularios de contacto y proteger la web contra el spam, utilizamos los servicios de infraestructura tecnológica de <strong>Cloudflare, Inc.</strong> (incluyendo su sistema antispam invisible Turnstile) y la pasarela de envío de correos de <strong>Resend, Inc.</strong>
+              </p>
+              <p className="mb-3">
+                Ambas empresas actúan estrictamente como Encargados del Tratamiento, limitándose a procesar técnicamente los datos para entregarlos en nuestra bandeja de entrada, sin almacenar los mensajes en bases de datos de terceros. 
+              </p>
+              <p>
+                Ambas entidades operan desde Estados Unidos y cumplen con el RGPD al estar adheridas y certificadas bajo el <strong>Marco de Privacidad de Datos UE-EE.UU. (Data Privacy Framework)</strong>, garantizando un nivel de protección de datos equivalente al europeo.
+              </p>
             </div>
 
             <div>
